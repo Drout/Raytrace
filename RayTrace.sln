@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RayTrace", "RayTrace\RayTrace.vbproj", "{E7AE3933-E5E7-4458-A6E2-86D833657FD7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayTraceHelper", "RayTraceHelper\RayTraceHelper.csproj", "{21A065A6-CE70-45A6-A082-BDA2EF682CF3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{E7AE3933-E5E7-4458-A6E2-86D833657FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7AE3933-E5E7-4458-A6E2-86D833657FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7AE3933-E5E7-4458-A6E2-86D833657FD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21A065A6-CE70-45A6-A082-BDA2EF682CF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21A065A6-CE70-45A6-A082-BDA2EF682CF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21A065A6-CE70-45A6-A082-BDA2EF682CF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21A065A6-CE70-45A6-A082-BDA2EF682CF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

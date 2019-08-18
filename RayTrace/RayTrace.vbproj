@@ -119,5 +119,11 @@
     </None>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RayTraceHelper\RayTraceHelper.csproj">
+      <Project>{21a065a6-ce70-45a6-a082-bda2ef682cf3}</Project>
+      <Name>RayTraceHelper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
