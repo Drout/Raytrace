@@ -1,36 +1,41 @@
-﻿Imports RayTraceHelper
+﻿Imports System.Numerics
+Imports RayTraceHelper
+'Imports System.Windows.Media.Media3D
 Module RayTrace
     Const SpheresCount As Integer = 2
     Dim pp As Double
     'Dim px, py, pz As Double
-    Dim p, Ray As Point3D
+    Dim p, Ray As Vector3
     'Dim dx, dy, dz As Double
     'Dim PosX, PosY, PosZ As Double
-    Dim Pos As Point3D
+    Dim Pos As Vector3
     Dim n, s, l, u, v As Double
 
     Dim aa, bb, dd, sc As Double
-    Dim nn, nx, ny, nz As Double
-    Dim r(SpheresCount) As Double
-    Dim q(SpheresCount) As Double
-    Dim c(SpheresCount, 2) As Double
+    'Dim nn, nx, ny, nz As Double
+    Dim normv As Vector3
+    'Dim r(SpheresCount) As Double
+    'Dim q(SpheresCount) As Double
+    'Dim c(SpheresCount, 2) As Double
+    Dim Spheres(2) As Sphere
     Dim image1 As Bitmap
 
-    Dim point As Point3D
+    'Dim point As Point3D
     Function Raytrace(SizeX As Integer, SizeY As Integer) As Bitmap
-        r(1) = 0.2 : r(2) = 0.6
-        c(1, 0) = 0.9 : c(1, 1) = -1.1 : c(1, 2) = 2 : c(2, 0) = -0.3 : c(2, 1) = -0.8 : c(2, 2) = 3
+        Spheres(1) = New Sphere(New Vector3(0.9, -1.1, 2), 0.2)
+        Spheres(2) = New Sphere(New Vector3(-0.3, -0.8, 3), 0.6)
+
         image1 = New Bitmap(SizeX, SizeY)
-        Ray = New Point3D()
-        p = New Point3D()
-        For k = 1 To SpheresCount
-            q(k) = r(k) * r(k)
-        Next k
+        Ray = New Vector3()
+        p = New Vector3()
 
         For i = 0 To SizeY - 1 : For j = 0 To SizeX - 1
-                Pos = New Point3D(0.3, -0.5, 0)
-                'Pos.X = 0.3 : Pos.Y = -0.5 : Pos.Z = 0
-                Ray.X = j - SizeX / 2 : Ray.Y = i - SizeY / 2 : Ray.Z = 475 : dd = Ray.X * Ray.X + Ray.Y * Ray.Y + Ray.Z * Ray.Z
+                Pos = New Vector3(0.3, -0.5, 0)
+
+                Ray.X = j - SizeX / 2 : Ray.Y = i - SizeY / 2 : Ray.Z = SizeX
+                'dd = Ray.X * Ray.X + Ray.Y * Ray.Y + Ray.Z * Ray.Z
+                'dd = Vector3.Dot(Ray, Ray)
+                dd = Ray.Length * Ray.Length
                 Hundred(j, i)
             Next j
         Next i
@@ -41,32 +46,50 @@ Module RayTrace
 100:
         n = Pos.Y >= 0 Or Ray.Y <= 0 : If Not n Then s = -Pos.Y / Ray.Y
         For k = 1 To SpheresCount
-            p.X = c(k, 0) - Pos.X : p.Y = c(k, 1) - Pos.Y : p.Z = c(k, 2) - Pos.Z
-            pp = p.X * p.X + p.Y * p.Y + p.Z * p.Z
-            'ppp = p * p
-            sc = p.X * Ray.X + p.Y * Ray.Y + p.Z * Ray.Z
+            'p.X = Spheres(k).Center.X - Pos.X : p.Y = Spheres(k).Center.Y - Pos.Y : p.Z = Spheres(k).Center.Z - Pos.Z
+            p = Spheres(k).Center - Pos
+            'pp = p.X * p.X + p.Y * p.Y + p.Z * p.Z
+            pp = Vector3.Dot(p, p)
+            'sc = p.X * Ray.X + p.Y * Ray.Y + p.Z * Ray.Z
+            sc = Vector3.Dot(p, Ray)
+
             If sc <= 0 Then GoTo 200
             bb = sc * sc / dd
-            aa = q(k) - pp + bb
+            aa = Spheres(k).Q - pp + bb
             If aa <= 0 Then GoTo 200
             sc = (Math.Sqrt(bb) - Math.Sqrt(aa)) / Math.Sqrt(dd)
             If sc < s Or n < 0 Then n = k : s = sc
 200:
         Next k
-        If n < 0 Then
+        If n < 0 Then ' we hit nothing (so it's the sky)
             Return
         End If
-        Ray.X = Ray.X * s : Ray.Y = Ray.Y * s : Ray.Z = Ray.Z * s : dd = dd * s * s
-        Pos.X = Pos.X + Ray.X : Pos.Y = Pos.Y + Ray.Y : Pos.Z = Pos.Z + Ray.Z
-        If n = 0 Then GoTo 300
-        nx = Pos.X - c(n, 0) : ny = Pos.Y - c(n, 1) : nz = Pos.Z - c(n, 2)
-        nn = nx * nx + ny * ny + nz * nz
-        l = 2 * (Ray.X * nx + Ray.Y * ny + Ray.Z * nz) / nn
-        Ray.X = Ray.X - nx * l : Ray.Y = Ray.Y - ny * l : Ray.Z = Ray.Z - nz * l
+        ' we hit something
+        '        Ray.X = Ray.X * s : Ray.Y = Ray.Y * s : Ray.Z = Ray.Z * s : dd = dd * s * s ' set the ray to the correct length
+        Ray = Ray * s
+        dd = dd * s * s
+        ' go where the ray hit
+        'Pos.X = Pos.X + Ray.X : Pos.Y = Pos.Y + Ray.Y : Pos.Z = Pos.Z + Ray.Z 
+        Pos = Pos + Ray
+        If n = 0 Then GoTo 300         ' we hit the floor - finally! 
+        ' hit a sphere
+        ' calculate normal vector
+        'nx = Pos.X - Spheres(n).Center.X : ny = Pos.Y - Spheres(n).Center.Y : nz = Pos.Z - Spheres(n).Center.Z
+        normv = Pos - Spheres(n).Center
+        'nn = nx * nx + ny * ny + nz * nz
+        'nn = Vector3.Dot(normv, normv)
+        'l = 2 * (Ray.X * nx + Ray.Y * ny + Ray.Z * nz) / nn
+        l = 2 * Vector3.Dot(Ray, normv) / Vector3.Dot(normv, normv)
+
+        'Ray.X = Ray.X - nx * l : Ray.Y = Ray.Y - ny * l : Ray.Z = Ray.Z - nz * l
+        Ray = Ray - normv * l
         GoTo 100
 300:
+        ' we hit the floor - finally!            
+        ' check the shadows
         For k = 1 To SpheresCount
-            u = c(k, 0) - Pos.X : v = c(k, 2) - Pos.Z : If u * u + v * v <= q(k) Then Return
+            u = Spheres(k).Center.X - Pos.X : v = Spheres(k).Center.Z - Pos.Z
+            If u * u + v * v <= Spheres(k).Q Then Return ' we are in the shadow
         Next k
         If (Pos.X - Int(Pos.X) > 0.5) <> (Pos.Z - Int(Pos.Z) > 0.5) Then Draw(j, i)
         Return
