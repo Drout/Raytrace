@@ -1,12 +1,12 @@
 ﻿Imports RayTraceHelper
-
 Module RayTrace
     Const SpheresCount As Integer = 2
     Dim pp As Double
     'Dim px, py, pz As Double
-    Dim p, d As Point3D
+    Dim p, Ray As Point3D
     'Dim dx, dy, dz As Double
-    Dim x, y, z As Double
+    'Dim PosX, PosY, PosZ As Double
+    Dim Pos As Point3D
     Dim n, s, l, u, v As Double
 
     Dim aa, bb, dd, sc As Double
@@ -21,15 +21,16 @@ Module RayTrace
         r(1) = 0.2 : r(2) = 0.6
         c(1, 0) = 0.9 : c(1, 1) = -1.1 : c(1, 2) = 2 : c(2, 0) = -0.3 : c(2, 1) = -0.8 : c(2, 2) = 3
         image1 = New Bitmap(SizeX, SizeY)
-        d = New Point3D()
+        Ray = New Point3D()
         p = New Point3D()
         For k = 1 To SpheresCount
             q(k) = r(k) * r(k)
         Next k
 
         For i = 0 To SizeY - 1 : For j = 0 To SizeX - 1
-                x = 0.3 : y = -0.5 : z = 0
-                d.X = j - SizeX / 2 : d.Y = i - SizeY / 2 : d.Z = 475 : dd = d.X * d.X + d.Y * d.Y + d.Z * d.Z
+                Pos = New Point3D(0.3, -0.5, 0)
+                'Pos.X = 0.3 : Pos.Y = -0.5 : Pos.Z = 0
+                Ray.X = j - SizeX / 2 : Ray.Y = i - SizeY / 2 : Ray.Z = 475 : dd = Ray.X * Ray.X + Ray.Y * Ray.Y + Ray.Z * Ray.Z
                 Hundred(j, i)
             Next j
         Next i
@@ -38,11 +39,12 @@ Module RayTrace
 
     Sub Hundred(j As Integer, i As Integer)
 100:
-        n = y >= 0 Or d.Y <= 0 : If Not n Then s = -y / d.Y
+        n = Pos.Y >= 0 Or Ray.Y <= 0 : If Not n Then s = -Pos.Y / Ray.Y
         For k = 1 To SpheresCount
-            p.X = c(k, 0) - x : p.Y = c(k, 1) - y : p.Z = c(k, 2) - z
+            p.X = c(k, 0) - Pos.X : p.Y = c(k, 1) - Pos.Y : p.Z = c(k, 2) - Pos.Z
             pp = p.X * p.X + p.Y * p.Y + p.Z * p.Z
-            sc = p.X * d.X + p.Y * d.Y + p.Z * d.Z
+            'ppp = p * p
+            sc = p.X * Ray.X + p.Y * Ray.Y + p.Z * Ray.Z
             If sc <= 0 Then GoTo 200
             bb = sc * sc / dd
             aa = q(k) - pp + bb
@@ -54,19 +56,19 @@ Module RayTrace
         If n < 0 Then
             Return
         End If
-        d.X = d.X * s : d.Y = d.Y * s : d.Z = d.Z * s : dd = dd * s * s
-        x = x + d.X : y = y + d.Y : z = z + d.Z
+        Ray.X = Ray.X * s : Ray.Y = Ray.Y * s : Ray.Z = Ray.Z * s : dd = dd * s * s
+        Pos.X = Pos.X + Ray.X : Pos.Y = Pos.Y + Ray.Y : Pos.Z = Pos.Z + Ray.Z
         If n = 0 Then GoTo 300
-        nx = x - c(n, 0) : ny = y - c(n, 1) : nz = z - c(n, 2)
+        nx = Pos.X - c(n, 0) : ny = Pos.Y - c(n, 1) : nz = Pos.Z - c(n, 2)
         nn = nx * nx + ny * ny + nz * nz
-        l = 2 * (d.X * nx + d.Y * ny + d.Z * nz) / nn
-        d.X = d.X - nx * l : d.Y = d.Y - ny * l : d.Z = d.Z - nz * l
+        l = 2 * (Ray.X * nx + Ray.Y * ny + Ray.Z * nz) / nn
+        Ray.X = Ray.X - nx * l : Ray.Y = Ray.Y - ny * l : Ray.Z = Ray.Z - nz * l
         GoTo 100
 300:
         For k = 1 To SpheresCount
-            u = c(k, 0) - x : v = c(k, 2) - z : If u * u + v * v <= q(k) Then Return
+            u = c(k, 0) - Pos.X : v = c(k, 2) - Pos.Z : If u * u + v * v <= q(k) Then Return
         Next k
-        If (x - Int(x) > 0.5) <> (z - Int(z) > 0.5) Then Draw(j, i)
+        If (Pos.X - Int(Pos.X) > 0.5) <> (Pos.Z - Int(Pos.Z) > 0.5) Then Draw(j, i)
         Return
     End Sub
 
