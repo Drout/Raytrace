@@ -34,8 +34,7 @@ Module RayTrace
 
                 Ray.X = j - SizeX / 2 : Ray.Y = i - SizeY / 2 : Ray.Z = SizeX
                 'dd = Ray.X * Ray.X + Ray.Y * Ray.Y + Ray.Z * Ray.Z
-                'dd = Vector3.Dot(Ray, Ray)
-                dd = Ray.Length * Ray.Length
+                dd = Vector3.Dot(Ray, Ray) 'dd = Ray.Length * Ray.Length
                 Hundred(j, i)
             Next j
         Next i
@@ -49,19 +48,22 @@ Module RayTrace
             'p.X = Spheres(k).Center.X - Pos.X : p.Y = Spheres(k).Center.Y - Pos.Y : p.Z = Spheres(k).Center.Z - Pos.Z
             p = Spheres(k).Center - Pos
             'pp = p.X * p.X + p.Y * p.Y + p.Z * p.Z
-            pp = Vector3.Dot(p, p)
+            pp = Vector3.Dot(p, p) 'p.LengthSquared 
             'sc = p.X * Ray.X + p.Y * Ray.Y + p.Z * Ray.Z
             sc = Vector3.Dot(p, Ray)
 
-            If sc <= 0 Then GoTo 200
-            bb = sc * sc / dd
-            aa = Spheres(k).Q - pp + bb
-            If aa <= 0 Then GoTo 200
-            sc = (Math.Sqrt(bb) - Math.Sqrt(aa)) / Math.Sqrt(dd)
-            If sc < s Or n < 0 Then n = k : s = sc
-200:
+            If sc > 0 Then
+                bb = sc * sc / dd
+                aa = Spheres(k).Q - pp + bb
+                If aa > 0 Then
+                    sc = (Math.Sqrt(bb) - Math.Sqrt(aa)) / Math.Sqrt(dd)
+                    If sc < s Or n < 0 Then n = k : s = sc
+                End If
+
+            End If
         Next k
         If n < 0 Then ' we hit nothing (so it's the sky)
+            Draw(j, i, Pos.Z - Int(Pos.Z), Pos.X - Int(Pos.X))
             Return
         End If
         ' we hit something
@@ -81,6 +83,7 @@ Module RayTrace
         'l = 2 * (Ray.X * nx + Ray.Y * ny + Ray.Z * nz) / nn
         l = 2 * Vector3.Dot(Ray, normv) / Vector3.Dot(normv, normv)
 
+
         'Ray.X = Ray.X - nx * l : Ray.Y = Ray.Y - ny * l : Ray.Z = Ray.Z - nz * l
         Ray = Ray - normv * l
         GoTo 100
@@ -91,11 +94,17 @@ Module RayTrace
             u = Spheres(k).Center.X - Pos.X : v = Spheres(k).Center.Z - Pos.Z
             If u * u + v * v <= Spheres(k).Q Then Return ' we are in the shadow
         Next k
-        If (Pos.X - Int(Pos.X) > 0.5) <> (Pos.Z - Int(Pos.Z) > 0.5) Then Draw(j, i)
+        ' If (Pos.X - Int(Pos.X) > 0.5) <> (Pos.Z - Int(Pos.Z) > 0.5) Then
+        Draw(j, i, Pos.X - Int(Pos.X), Pos.Z - Int(Pos.Z))
+        'End If
         Return
     End Sub
 
     Sub Draw(x As Integer, y As Integer)
         image1.SetPixel(x, y, Color.Black())
+    End Sub
+
+    Sub Draw(x As Integer, y As Integer, XX As Single, YY As Single)
+        image1.SetPixel(x, y, Color.FromArgb(120 * (XX + YY), 255 * XX, 255 * YY))
     End Sub
 End Module
