@@ -26,6 +26,7 @@ Module RayTrace
         Spheres(2) = New Sphere(New Vector3(-0.3, -0.8, 3), 0.6)
 
         image1 = New Bitmap(SizeX, SizeY)
+
         Ray = New Vector3()
         p = New Vector3()
 
@@ -92,7 +93,11 @@ Module RayTrace
         ' check the shadows
         For k = 1 To SpheresCount
             u = Spheres(k).Center.X - Pos.X : v = Spheres(k).Center.Z - Pos.Z
-            If u * u + v * v <= Spheres(k).Q Then Return ' we are in the shadow
+            If u * u + v * v <= Spheres(k).Q Then
+                ' we are in the shadow
+                Draw(j, i, Pos.X - Int(Pos.X), Pos.Z - Int(Pos.Z), (u * u + v * v) / Spheres(k).Q * 255)
+                Return
+            End If
         Next k
         ' If (Pos.X - Int(Pos.X) > 0.5) <> (Pos.Z - Int(Pos.Z) > 0.5) Then
         Draw(j, i, Pos.X - Int(Pos.X), Pos.Z - Int(Pos.Z))
@@ -104,7 +109,8 @@ Module RayTrace
         image1.SetPixel(x, y, Color.Black())
     End Sub
 
-    Sub Draw(x As Integer, y As Integer, XX As Single, YY As Single)
-        image1.SetPixel(x, y, Color.FromArgb(120 * (XX + YY), 255 * XX, 255 * YY))
+    Sub Draw(x As Integer, y As Integer, XX As Single, YY As Single, Optional a As Single = 255)
+        image1.SetPixel(x, y, Color.FromArgb(a / 2 * (XX + YY), a * XX, a * YY))
+
     End Sub
 End Module
