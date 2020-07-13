@@ -36,14 +36,13 @@ Module RayTrace
                 Ray.X = j - SizeX / 2 : Ray.Y = i - SizeY / 2 : Ray.Z = SizeX
                 'dd = Ray.X * Ray.X + Ray.Y * Ray.Y + Ray.Z * Ray.Z
                 dd = Vector3.Dot(Ray, Ray) 'dd = Ray.Length * Ray.Length
-                Hundred(j, i)
+                FollowRay(j, i)
             Next j
         Next i
         Return image1
     End Function
 
-    Sub Hundred(j As Integer, i As Integer)
-100:
+    Sub FollowRay(j As Integer, i As Integer)
         n = Pos.Y >= 0 Or Ray.Y <= 0 : If Not n Then s = -Pos.Y / Ray.Y
         For k = 1 To SpheresCount
             'p.X = Spheres(k).Center.X - Pos.X : p.Y = Spheres(k).Center.Y - Pos.Y : p.Z = Spheres(k).Center.Z - Pos.Z
@@ -74,34 +73,35 @@ Module RayTrace
         ' go where the ray hit
         'Pos.X = Pos.X + Ray.X : Pos.Y = Pos.Y + Ray.Y : Pos.Z = Pos.Z + Ray.Z 
         Pos = Pos + Ray
-        If n = 0 Then GoTo 300         ' we hit the floor - finally! 
-        ' hit a sphere
-        ' calculate normal vector
-        'nx = Pos.X - Spheres(n).Center.X : ny = Pos.Y - Spheres(n).Center.Y : nz = Pos.Z - Spheres(n).Center.Z
-        normv = Pos - Spheres(n).Center
-        'nn = nx * nx + ny * ny + nz * nz
-        'nn = Vector3.Dot(normv, normv)
-        'l = 2 * (Ray.X * nx + Ray.Y * ny + Ray.Z * nz) / nn
-        l = 2 * Vector3.Dot(Ray, normv) / Vector3.Dot(normv, normv)
+        If n <> 0 Then          ' we hit the floor - finally! 
+            ' hit a sphere
+            ' calculate normal vector
+            'nx = Pos.X - Spheres(n).Center.X : ny = Pos.Y - Spheres(n).Center.Y : nz = Pos.Z - Spheres(n).Center.Z
+            normv = Pos - Spheres(n).Center
+            'nn = nx * nx + ny * ny + nz * nz
+            'nn = Vector3.Dot(normv, normv)
+            'l = 2 * (Ray.X * nx + Ray.Y * ny + Ray.Z * nz) / nn
+            l = 2 * Vector3.Dot(Ray, normv) / Vector3.Dot(normv, normv)
 
 
-        'Ray.X = Ray.X - nx * l : Ray.Y = Ray.Y - ny * l : Ray.Z = Ray.Z - nz * l
-        Ray = Ray - normv * l
-        GoTo 100
-300:
-        ' we hit the floor - finally!            
-        ' check the shadows
-        For k = 1 To SpheresCount
-            u = Spheres(k).Center.X - Pos.X : v = Spheres(k).Center.Z - Pos.Z
-            If u * u + v * v <= Spheres(k).Q Then
-                ' we are in the shadow
-                Draw(j, i, Pos.X - Int(Pos.X), Pos.Z - Int(Pos.Z), (u * u + v * v) / Spheres(k).Q * 255)
-                Return
-            End If
-        Next k
-        ' If (Pos.X - Int(Pos.X) > 0.5) <> (Pos.Z - Int(Pos.Z) > 0.5) Then
-        Draw(j, i, Pos.X - Int(Pos.X), Pos.Z - Int(Pos.Z))
-        'End If
+            'Ray.X = Ray.X - nx * l : Ray.Y = Ray.Y - ny * l : Ray.Z = Ray.Z - nz * l
+            Ray = Ray - normv * l
+            FollowRay(j, i)
+        Else
+            ' we hit the floor - finally!            
+            ' check the shadows
+            For k = 1 To SpheresCount
+                u = Spheres(k).Center.X - Pos.X : v = Spheres(k).Center.Z - Pos.Z
+                If u * u + v * v <= Spheres(k).Q Then
+                    ' we are in the shadow
+                    Draw(j, i, Pos.X - Int(Pos.X), Pos.Z - Int(Pos.Z), (u * u + v * v) / Spheres(k).Q * 255)
+                    Return
+                End If
+            Next k
+            ' If (Pos.X - Int(Pos.X) > 0.5) <> (Pos.Z - Int(Pos.Z) > 0.5) Then
+            Draw(j, i, Pos.X - Int(Pos.X), Pos.Z - Int(Pos.Z))
+            'End If
+        End If
         Return
     End Sub
 
